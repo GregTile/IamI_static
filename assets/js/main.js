@@ -1,7 +1,14 @@
 /**
  * IamIndependent.com - Main JavaScript
- * Interactive components: Mobile Nav, Calculator, Modal, FAQ Accordion
+ * Interactive components: Mobile Nav, Calculator, Calendly Integration, FAQ Accordion
  */
+
+// ==========================================================================
+// CONFIGURATION
+// To connect your actual Calendly calendar, simply replace this URL:
+// ==========================================================================
+const CALENDLY_URL = 'https://calendly.com/gregory-gogregory/30min';
+
 
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Mobile Menu Toggle
@@ -29,26 +36,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 3. Booking Assessment Modal
-  const modal = document.getElementById('bookingModal');
+  // 3. Calendly & Booking Modal Handler
   const openModalBtns = document.querySelectorAll('.btn-open-modal');
+  const modal = document.getElementById('bookingModal');
   const closeModalBtn = document.getElementById('closeModal');
 
-  if (modal) {
-    openModalBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
+  openModalBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      // If Calendly's official widget script is loaded and configured:
+      if (window.Calendly && CALENDLY_URL && !CALENDLY_URL.includes('your-username')) {
+        Calendly.initPopupWidget({ url: CALENDLY_URL });
+      } else if (modal) {
+        // Fallback to internal appointment request modal
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
-      });
+      } else {
+        // Redirect to booking page
+        window.location.href = 'book.html';
+      }
     });
+  });
 
-    if (closeModalBtn) {
-      closeModalBtn.addEventListener('click', () => {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-      });
-    }
+  if (modal && closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    });
 
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
@@ -82,12 +96,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const grossBilling = rate * annualHours;
     const annualExpenses = monthlyExp * 12;
 
-    // Typical marginal combined tax bracket (Federal + State + FICA) estimated conservatively at 35%
+    // Combined marginal tax rate (Federal + State + FICA) estimated conservatively at 35%
     const estimatedTaxRate = 0.35;
     const estimatedAnnualTaxSavings = annualExpenses * estimatedTaxRate;
 
-    // Estimated take-home:
-    // (Gross - Expenses) taxed at ~30% effective rate after deductions + reimbursed tax-free expenses
+    // Estimated take-home
     const taxableIncome = Math.max(0, grossBilling - annualExpenses);
     const estimatedNetTax = taxableIncome * 0.28;
     const estimatedTakeHome = (taxableIncome - estimatedNetTax) + annualExpenses;
@@ -109,43 +122,49 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCalculator();
   }
 
-  // 5. Booking / Contact Form Handler
+  // 5. Secondary Consultation / Callback Form Handler
+  // Uses direct mailto fallback or can be connected to any static form backend (e.g. Formspree/Web3Forms)
   const consultationForms = document.querySelectorAll('.consultation-form');
   consultationForms.forEach(form => {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const submitBtn = form.querySelector('button[type="submit"]');
-      const originalText = submitBtn ? submitBtn.innerText : 'Submit';
+
+      const name = (form.querySelector('[name="name"]') || {}).value || 'Prospective Contractor';
+      const email = (form.querySelector('[name="email"]') || {}).value || '';
+      const phone = (form.querySelector('[name="phone"]') || {}).value || '';
+      const role = (form.querySelector('[name="role"]') || {}).value || 'Contractor';
+      const message = (form.querySelector('[name="message"]') || {}).value || '';
+
+      // Prepare mailto fallback
+      const subject = encodeURIComponent(`Consultation Request: ${name} (${role})`);
+      const body = encodeURIComponent(
+        `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nSituation: ${role}\n\nDetails:\n${message}`
+      );
+      const mailtoLink = `mailto:info@iamindependent.com?subject=${subject}&body=${body}`;
 
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerText = 'Transmitting...';
+        submitBtn.innerText = 'Submitting...';
       }
 
       setTimeout(() => {
-        // Collect fields
-        const nameInput = form.querySelector('[name="name"]') || form.querySelector('[name="first_name"]');
-        const emailInput = form.querySelector('[name="email"]');
-        const phoneInput = form.querySelector('[name="phone"]');
-        const messageInput = form.querySelector('[name="message"]');
-
-        const name = nameInput ? nameInput.value : '';
-        const email = emailInput ? emailInput.value : '';
-        const phone = phoneInput ? phoneInput.value : '';
-        const message = messageInput ? messageInput.value : '';
-
-        // Show friendly success confirmation
         form.innerHTML = `
           <div style="text-align: center; padding: 2rem 1rem;">
             <div style="display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%; background:#d1fae5; color:#059669; margin-bottom:1rem;">
               <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <h3 style="margin-bottom:0.5rem; color:#0f172a;">Thank You, ${name || 'there'}!</h3>
-            <p style="color:#475569; margin-bottom:1.5rem;">We have received your consultation request. An advisor will reach out to you directly at <strong>${email}</strong> or <strong>${phone}</strong> within 1 business day.</p>
-            <p style="font-size:0.9rem; color:#64748b;">Need faster assistance? Call us right now at <a href="tel:5512650158" style="color:#0284c7; font-weight:600;">551-265-0158</a> or email <a href="mailto:zev@iamindependent.com" style="color:#0284c7; font-weight:600;">zev@iamindependent.com</a>.</p>
+            <h3 style="margin-bottom:0.5rem; color:#0f172a;">Thank You, ${name}!</h3>
+            <p style="color:#475569; margin-bottom:1.5rem;">
+              Your inquiry has been logged. Our advisory team will review your details and contact you at <strong>${email}</strong> or <strong>${phone}</strong> within 1 business day.
+            </p>
+            <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+              <a href="${mailtoLink}" class="btn btn-secondary btn-sm" style="display:inline-flex;">Send Direct Email Copy</a>
+              <a href="tel:2015672434" class="btn btn-primary btn-sm" style="display:inline-flex;">Call 201-567-2434 Now</a>
+            </div>
           </div>
         `;
-      }, 700);
+      }, 500);
     });
   });
 });

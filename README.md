@@ -7,7 +7,7 @@ Designed specifically to be deployed directly on **GitHub Pages**.
 - **Tech Contractor Centric:** Positioned for software engineers, DevOps, and technical professionals transitioning from full-time W-2 to contracting.
 - **Pure Static Architecture:** Zero build steps, zero node_modules dependencies. Fast, accessible, and lightweight.
 - **Interactive Take-Home Estimator:** A visual slider tool demonstrating pre-tax business expense savings.
-- **Conversion Focused:** High-visibility booking CTAs ("Book 15-Min Free Assessment"), modal scheduler, direct click-to-call (`551-265-0158`), and advisor email.
+- **Conversion Focused:** High-visibility booking CTAs ("Book 15-Min Free Assessment"), modal scheduler, direct click-to-call (`201-567-2434`), and advisor email.
 - **100% Content Parity:** Retains all factual heritage, founder backgrounds (Steven Wasserstrom CFA/CPA, Nathan Fink Esq./CPA), corporate address, and services.
 
 ## Directory Structure
@@ -52,3 +52,4 @@ Designed specifically to be deployed directly on **GitHub Pages**.
 
 3. **Connecting a Live Calendar (Calendly / Cal.com / Wix Bookings)**:
    - In `index.html` and `book.html`, the booking buttons open an appointment modal or consultation form. If you prefer to embed an external booking widget (e.g. Calendly or Cal.com), you can simply paste your embed code inside the modal in `index.html` or on `book.html`.
+
