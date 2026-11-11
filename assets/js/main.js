@@ -36,38 +36,115 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 3. Calendly & Booking Modal Handler
+  // 3. High-Conversion Booking Modal Handler (No Iframe Glitches)
+  let modal = document.getElementById('bookingModal');
+
+  // Ensure the booking modal exists on every page across the site
+  if (!modal) {
+    const modalWrapper = document.createElement('div');
+    modalWrapper.innerHTML = `
+      <div class="modal-overlay" id="bookingModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-content">
+          <button class="modal-close" id="closeModal" aria-label="Close modal">&times;</button>
+          <div style="text-align: center; margin-bottom: 1.25rem;">
+            <span class="badge" style="margin-bottom: 0.5rem;">100% Free &amp; Confidential</span>
+            <h3 id="modalTitle" style="margin-top: 0.25rem;">Book Your 15-Minute Assessment</h3>
+            <p style="font-size:0.95rem; color:#64748b; margin-top: 0.35rem;">
+              Review your contract rate, calculate pre-tax expense savings, and get answers from our CPA/CFA advisory team.
+            </p>
+          </div>
+
+          <div class="modal-calendar-box">
+            <a href="${CALENDLY_URL}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-calendly js-calendly-link">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              Pick a Time on Calendly
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            </a>
+            <div class="modal-calendar-meta">
+              <span>&#10003; Opens in a new tab</span>
+              <span>&#10003; Instant calendar invite</span>
+              <span>&#10003; No obligation</span>
+            </div>
+          </div>
+
+          <div class="modal-divider">
+            <span>Or Reach Us Directly</span>
+          </div>
+
+          <div class="modal-direct-grid">
+            <a href="tel:2015672434" class="modal-direct-card">
+              <div class="modal-direct-icon" style="background:var(--accent-light); color:var(--accent-dark);">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+              </div>
+              <strong>Call an Advisor</strong>
+              <span class="direct-link-text">201-567-2434</span>
+              <small>Mon &ndash; Fri, 9am &ndash; 6pm EST</small>
+            </a>
+
+            <a href="mailto:info@iamindependent.com?subject=Contractor%20Assessment%20Inquiry" class="modal-direct-card">
+              <div class="modal-direct-icon" style="background:var(--primary-light); color:var(--primary);">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+              </div>
+              <strong>Email Our Team</strong>
+              <span class="direct-link-text">info@iamindependent.com</span>
+              <small>Replies within 1 business day</small>
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modalWrapper.firstElementChild);
+    modal = document.getElementById('bookingModal');
+  }
+
+  // Sync all Calendly links with configured CALENDLY_URL
+  const calendlyLinks = document.querySelectorAll('.js-calendly-link');
+  calendlyLinks.forEach(link => {
+    if (CALENDLY_URL) {
+      link.setAttribute('href', CALENDLY_URL);
+    }
+    link.addEventListener('click', () => {
+      if (modal && modal.classList.contains('active')) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+
   const openModalBtns = document.querySelectorAll('.btn-open-modal');
-  const modal = document.getElementById('bookingModal');
   const closeModalBtn = document.getElementById('closeModal');
+
+  function closeBookingModal() {
+    if (modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
 
   openModalBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      // If Calendly's official widget script is loaded and configured:
-      if (window.Calendly && CALENDLY_URL && !CALENDLY_URL.includes('your-username')) {
-        Calendly.initPopupWidget({ url: CALENDLY_URL });
-      } else if (modal) {
-        // Fallback to internal appointment request modal
+      if (modal) {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
       } else {
-        // Redirect to booking page
-        window.location.href = 'book.html';
+        window.open(CALENDLY_URL, '_blank', 'noopener,noreferrer');
       }
     });
   });
 
   if (modal && closeModalBtn) {
-    closeModalBtn.addEventListener('click', () => {
-      modal.classList.remove('active');
-      document.body.style.overflow = '';
-    });
+    closeModalBtn.addEventListener('click', closeBookingModal);
 
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
+        closeBookingModal();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closeBookingModal();
       }
     });
   }
@@ -121,50 +198,4 @@ document.addEventListener('DOMContentLoaded', () => {
     expenseSlider.addEventListener('input', updateCalculator);
     updateCalculator();
   }
-
-  // 5. Secondary Consultation / Callback Form Handler
-  // Uses direct mailto fallback or can be connected to any static form backend (e.g. Formspree/Web3Forms)
-  const consultationForms = document.querySelectorAll('.consultation-form');
-  consultationForms.forEach(form => {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const submitBtn = form.querySelector('button[type="submit"]');
-
-      const name = (form.querySelector('[name="name"]') || {}).value || 'Prospective Contractor';
-      const email = (form.querySelector('[name="email"]') || {}).value || '';
-      const phone = (form.querySelector('[name="phone"]') || {}).value || '';
-      const role = (form.querySelector('[name="role"]') || {}).value || 'Contractor';
-      const message = (form.querySelector('[name="message"]') || {}).value || '';
-
-      // Prepare mailto fallback
-      const subject = encodeURIComponent(`Consultation Request: ${name} (${role})`);
-      const body = encodeURIComponent(
-        `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nSituation: ${role}\n\nDetails:\n${message}`
-      );
-      const mailtoLink = `mailto:info@iamindependent.com?subject=${subject}&body=${body}`;
-
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Submitting...';
-      }
-
-      setTimeout(() => {
-        form.innerHTML = `
-          <div style="text-align: center; padding: 2rem 1rem;">
-            <div style="display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%; background:#d1fae5; color:#059669; margin-bottom:1rem;">
-              <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-            </div>
-            <h3 style="margin-bottom:0.5rem; color:#0f172a;">Thank You, ${name}!</h3>
-            <p style="color:#475569; margin-bottom:1.5rem;">
-              Your inquiry has been logged. Our advisory team will review your details and contact you at <strong>${email}</strong> or <strong>${phone}</strong> within 1 business day.
-            </p>
-            <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
-              <a href="${mailtoLink}" class="btn btn-secondary btn-sm" style="display:inline-flex;">Send Direct Email Copy</a>
-              <a href="tel:2015672434" class="btn btn-primary btn-sm" style="display:inline-flex;">Call 201-567-2434 Now</a>
-            </div>
-          </div>
-        `;
-      }, 500);
-    });
-  });
 });

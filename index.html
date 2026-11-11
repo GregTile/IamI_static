@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-5JBZPKZS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IamIndependent | Employer of Record & Umbrella Services for Tech Contractors</title>
   <meta name="description" content="Maximize your contract earnings without the tax and legal headache. IamIndependent provides W-2 Employer of Record, full E&O insurance, 401(k), and pre-tax expense reimbursements.">
   <link rel="stylesheet" href="assets/css/styles.css">
-  <!-- Calendly popup widget support -->
-  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
-  <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
 </head>
 <body>
 
@@ -441,54 +445,55 @@
   </main>
 
   <!-- Assessment Booking Modal -->
-  <div class="modal-overlay" id="bookingModal">
+  <div class="modal-overlay" id="bookingModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-content">
       <button class="modal-close" id="closeModal" aria-label="Close modal">&times;</button>
-      <div style="text-align: center; margin-bottom: 1.5rem;">
-        <span class="badge">Free Consultation</span>
-        <h3 style="margin-top: 0.5rem;">Schedule Your 15-Minute Assessment</h3>
-        <p style="font-size:0.95rem; color:#64748b;">A quick, confidential conversation to determine if IAI is the right fit for your upcoming contract.</p>
+      <div style="text-align: center; margin-bottom: 1.25rem;">
+        <span class="badge" style="margin-bottom: 0.5rem;">100% Free &amp; Confidential</span>
+        <h3 id="modalTitle" style="margin-top: 0.25rem;">Book Your 15-Minute Assessment</h3>
+        <p style="font-size:0.95rem; color:#64748b; margin-top: 0.35rem;">
+          Review your contract rate, calculate pre-tax expense savings, and get answers from our CPA/CFA advisory team.
+        </p>
       </div>
 
-      <form class="consultation-form">
-        <div class="form-group">
-          <label for="modalName">Full Name *</label>
-          <input type="text" id="modalName" name="name" class="form-control" placeholder="e.g. Alex Morgan" required>
+      <!-- Option 1: Instant Calendar Booking (New Tab) -->
+      <div class="modal-calendar-box">
+        <a href="https://calendly.com/gregory-gogregory/30min" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-calendly js-calendly-link">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          Pick a Time on Calendly
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+        </a>
+        <div class="modal-calendar-meta">
+          <span>&#10003; Opens in a new tab</span>
+          <span>&#10003; Instant calendar invite</span>
+          <span>&#10003; No obligation</span>
         </div>
+      </div>
 
-        <div class="form-group">
-          <label for="modalEmail">Work or Personal Email *</label>
-          <input type="email" id="modalEmail" name="email" class="form-control" placeholder="alex@domain.com" required>
-        </div>
+      <div class="modal-divider">
+        <span>Or Reach Us Directly</span>
+      </div>
 
-        <div class="form-group">
-          <label for="modalPhone">Phone Number *</label>
-          <input type="tel" id="modalPhone" name="phone" class="form-control" placeholder="(555) 000-0000" required>
-        </div>
+      <!-- Option 2 & 3: Direct Phone & Email (mailto:) -->
+      <div class="modal-direct-grid">
+        <a href="tel:2015672434" class="modal-direct-card">
+          <div class="modal-direct-icon" style="background:var(--accent-light); color:var(--accent-dark);">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+          </div>
+          <strong>Call an Advisor</strong>
+          <span class="direct-link-text">201-567-2434</span>
+          <small>Mon &ndash; Fri, 9am &ndash; 6pm EST</small>
+        </a>
 
-        <div class="form-group">
-          <label for="modalTiming">Current Situation</label>
-          <select id="modalTiming" name="situation" class="form-control">
-            <option value="evaluating">I have a contract offer in hand</option>
-            <option value="transitioning">Considering transitioning from full-time W-2</option>
-            <option value="current_1099">Currently 1099 / C2C and looking for an umbrella</option>
-            <option value="recruiter">I am a recruiter or agency partner</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="modalMsg">Note or Questions (Optional)</label>
-          <textarea id="modalMsg" name="message" class="form-control" placeholder="Tell us about your hourly rate, expected start date, or any specific questions..."></textarea>
-        </div>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.05rem;">
-          Confirm 15-Minute Session
-        </button>
-
-        <p style="font-size: 0.8rem; color:#64748b; text-align: center; margin-top: 1rem;">
-          Prefer an instant conversation? Call directly at <a href="tel:2015672434" style="color:var(--primary); font-weight:600;">201-567-2434</a> or email <a href="mailto:info@iamindependent.com" style="color:var(--primary); font-weight:600;">info@iamindependent.com</a>.
-        </p>
-      </form>
+        <a href="mailto:info@iamindependent.com?subject=Contractor%20Assessment%20Inquiry" class="modal-direct-card">
+          <div class="modal-direct-icon" style="background:var(--primary-light); color:var(--primary);">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          </div>
+          <strong>Email Our Team</strong>
+          <span class="direct-link-text">info@iamindependent.com</span>
+          <small>Replies within 1 business day</small>
+        </a>
+      </div>
     </div>
   </div>
 
