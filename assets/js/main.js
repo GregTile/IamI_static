@@ -7,7 +7,7 @@
 // CONFIGURATION
 // To connect your actual Calendly calendar, simply replace this URL:
 // ==========================================================================
-const CALENDLY_URL = 'https://calendly.com/gregory-gogregory/30min';
+const CALENDLY_URL = 'https://calendly.com/zev-iamindependent/30min';
 
 
 document.addEventListener('DOMContentLoaded', () => {
