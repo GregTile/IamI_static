@@ -18,6 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
     menuToggle.addEventListener('click', () => {
       navMenu.classList.toggle('active');
     });
+    navMenu.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+      });
+    });
   }
 
   // 2. FAQ Accordion

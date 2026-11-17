@@ -551,6 +551,10 @@ p:last-child { margin-bottom: 0; }
 }
 
 /* Interactive Calculator */
+#calculator {
+  scroll-margin-top: 80px;
+}
+
 .calc-card {
   background: #ffffff;
   border-radius: var(--radius-lg);
