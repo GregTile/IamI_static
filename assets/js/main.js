@@ -1,6 +1,6 @@
 /**
  * IamIndependent.com - Main JavaScript
- * Interactive components: Mobile Nav, Calculator, Calendly Integration, FAQ Accordion
+ * Interactive components: Mobile Nav, Calculator, Calendly Integration, FAQ Accordion, GA4 Event Tracking
  */
 
 // ==========================================================================
@@ -9,8 +9,36 @@
 // ==========================================================================
 const CALENDLY_URL = 'https://calendly.com/zev-iamindependent/30min';
 
+/**
+ * Safely send custom events to Google Analytics 4 (gtag.js)
+ */
+function trackEvent(eventName, params = {}) {
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', eventName, {
+      transport_type: 'beacon',
+      ...params
+    });
+  }
+}
+
+/**
+ * Identify which section of the page a clicked button/link belongs to
+ */
+function getCtaLocation(el) {
+  if (!el || typeof el.closest !== 'function') return 'unknown';
+  if (el.closest('#bookingModal')) return 'booking_modal';
+  if (el.closest('.top-notice')) return 'top_bar';
+  if (el.closest('.header')) return 'header';
+  if (el.closest('.hero')) return 'hero';
+  if (el.closest('.cta-banner')) return 'cta_banner';
+  if (el.closest('.footer')) return 'footer';
+  return 'page_body';
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
+  const pagePath = window.location.pathname || '/';
+
   // 1. Mobile Menu Toggle
   const menuToggle = document.getElementById('menuToggle');
   const navMenu = document.getElementById('navMenu');
@@ -25,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. FAQ Accordion
+  // 2. FAQ Accordion (+ GA4 tracking when a question is expanded)
   const faqItems = document.querySelectorAll('.faq-item');
   faqItems.forEach(item => {
     const questionBtn = item.querySelector('.faq-question');
@@ -36,6 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
         faqItems.forEach(other => other.classList.remove('active'));
         if (!isActive) {
           item.classList.add('active');
+          const labelEl = questionBtn.querySelector('span');
+          const questionText = (labelEl ? labelEl.textContent : questionBtn.textContent || '').trim();
+          trackEvent('faq_expand', {
+            question_text: questionText.slice(0, 100),
+            page_path: pagePath
+          });
         }
       });
     }
@@ -102,13 +136,20 @@ document.addEventListener('DOMContentLoaded', () => {
     modal = document.getElementById('bookingModal');
   }
 
-  // Sync all Calendly links with configured CALENDLY_URL
+  // Sync all Calendly links with configured CALENDLY_URL & track outbound Calendly clicks
   const calendlyLinks = document.querySelectorAll('.js-calendly-link');
   calendlyLinks.forEach(link => {
     if (CALENDLY_URL) {
       link.setAttribute('href', CALENDLY_URL);
     }
     link.addEventListener('click', () => {
+      trackEvent('calendly_click', {
+        cta_location: getCtaLocation(link),
+        button_text: (link.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+        destination_url: CALENDLY_URL,
+        page_path: pagePath
+      });
+
       if (modal && modal.classList.contains('active')) {
         modal.classList.remove('active');
         document.body.style.overflow = '';
@@ -154,7 +195,62 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. Interactive Calculator (Take-Home & Expense Savings Estimator)
+  // 4. Track "Book Assessment" / Consultation CTA clicks across all pages
+  const assessmentCtas = document.querySelectorAll(
+    '.btn-open-modal, a.btn[href*="book.html"], .top-notice a[href*="book.html"]'
+  );
+  assessmentCtas.forEach(cta => {
+    cta.addEventListener('click', () => {
+      trackEvent('book_assessment_click', {
+        cta_location: getCtaLocation(cta),
+        button_text: (cta.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+        page_path: pagePath
+      });
+    });
+  });
+
+  // 5. Track Direct Phone & Email Link Clicks (including inside modal)
+  document.querySelectorAll('a[href^="tel:"]').forEach(phoneLink => {
+    phoneLink.addEventListener('click', () => {
+      trackEvent('phone_click', {
+        cta_location: getCtaLocation(phoneLink),
+        page_path: pagePath
+      });
+    });
+  });
+
+  document.querySelectorAll('a[href^="mailto:"]').forEach(emailLink => {
+    emailLink.addEventListener('click', () => {
+      trackEvent('email_click', {
+        cta_location: getCtaLocation(emailLink),
+        page_path: pagePath
+      });
+    });
+  });
+
+  // 6. Track Completed Calendly Bookings on thank-you.html
+  if (
+    document.body.dataset.bookingConfirmed === 'true' ||
+    pagePath.endsWith('/thank-you.html') ||
+    pagePath.endsWith('/thank-you')
+  ) {
+    let alreadyTracked = false;
+    try {
+      alreadyTracked = sessionStorage.getItem('iai_assessment_booked') === '1';
+      if (!alreadyTracked) {
+        sessionStorage.setItem('iai_assessment_booked', '1');
+      }
+    } catch (_) {
+      // Ignore storage restrictions in private browsing
+    }
+    if (!alreadyTracked) {
+      trackEvent('assessment_booked', {
+        page_path: pagePath
+      });
+    }
+  }
+
+  // 7. Interactive Calculator (Take-Home & Expense Savings Estimator + GA4 Engagement)
   const hourlySlider = document.getElementById('hourlyRate');
   const hourlyDisplay = document.getElementById('hourlyRateVal');
   const expenseSlider = document.getElementById('monthlyExpenses');
@@ -164,43 +260,100 @@ document.addEventListener('DOMContentLoaded', () => {
   const annualTaxSavingsEl = document.getElementById('calcTaxSavings');
   const estimatedTakeHomeEl = document.getElementById('calcTakeHome');
 
-  function updateCalculator() {
-    if (!hourlySlider || !expenseSlider) return;
-
+  function getCalculatorSnapshot() {
     const rate = parseFloat(hourlySlider.value);
     const monthlyExp = parseFloat(expenseSlider.value);
-
-    if (hourlyDisplay) hourlyDisplay.textContent = `$${rate}/hr`;
-    if (expenseDisplay) expenseDisplay.textContent = `$${monthlyExp.toLocaleString()}/mo`;
-
-    // 2,000 working hours/year (40 hrs/wk * 50 wks)
     const annualHours = 2000;
     const grossBilling = rate * annualHours;
     const annualExpenses = monthlyExp * 12;
-
-    // Combined marginal tax rate (Federal + State + FICA) estimated conservatively at 35%
     const estimatedTaxRate = 0.35;
     const estimatedAnnualTaxSavings = annualExpenses * estimatedTaxRate;
-
-    // Estimated take-home
     const taxableIncome = Math.max(0, grossBilling - annualExpenses);
     const estimatedNetTax = taxableIncome * 0.28;
     const estimatedTakeHome = (taxableIncome - estimatedNetTax) + annualExpenses;
 
+    return {
+      rate,
+      monthlyExp,
+      grossBilling: Math.round(grossBilling),
+      estimatedAnnualTaxSavings: Math.round(estimatedAnnualTaxSavings),
+      estimatedTakeHome: Math.round(estimatedTakeHome)
+    };
+  }
+
+  function updateCalculator() {
+    if (!hourlySlider || !expenseSlider) return;
+
+    const snap = getCalculatorSnapshot();
+
+    if (hourlyDisplay) hourlyDisplay.textContent = `$${snap.rate}/hr`;
+    if (expenseDisplay) expenseDisplay.textContent = `$${snap.monthlyExp.toLocaleString()}/mo`;
+
     if (annualGrossEl) {
-      annualGrossEl.textContent = `$${Math.round(grossBilling).toLocaleString()}`;
+      annualGrossEl.textContent = `$${snap.grossBilling.toLocaleString()}`;
     }
     if (annualTaxSavingsEl) {
-      annualTaxSavingsEl.textContent = `$${Math.round(estimatedAnnualTaxSavings).toLocaleString()} / yr`;
+      annualTaxSavingsEl.textContent = `$${snap.estimatedAnnualTaxSavings.toLocaleString()} / yr`;
     }
     if (estimatedTakeHomeEl) {
-      estimatedTakeHomeEl.textContent = `$${Math.round(estimatedTakeHome).toLocaleString()}`;
+      estimatedTakeHomeEl.textContent = `$${snap.estimatedTakeHome.toLocaleString()}`;
     }
   }
 
   if (hourlySlider && expenseSlider) {
-    hourlySlider.addEventListener('input', updateCalculator);
-    expenseSlider.addEventListener('input', updateCalculator);
+    let hasTrackedCalculatorStart = false;
+    let rateDebounceTimer = null;
+    let expenseDebounceTimer = null;
+
+    function markCalculatorUsed() {
+      if (!hasTrackedCalculatorStart) {
+        hasTrackedCalculatorStart = true;
+        trackEvent('calculator_used', {
+          page_path: pagePath
+        });
+      }
+    }
+
+    hourlySlider.addEventListener('input', () => {
+      updateCalculator();
+      markCalculatorUsed();
+    });
+
+    expenseSlider.addEventListener('input', () => {
+      updateCalculator();
+      markCalculatorUsed();
+    });
+
+    hourlySlider.addEventListener('change', () => {
+      markCalculatorUsed();
+      clearTimeout(rateDebounceTimer);
+      rateDebounceTimer = setTimeout(() => {
+        const snap = getCalculatorSnapshot();
+        trackEvent('calculator_rate_change', {
+          value: snap.rate,
+          hourly_rate: snap.rate,
+          monthly_expenses: snap.monthlyExp,
+          estimated_tax_savings: snap.estimatedAnnualTaxSavings,
+          page_path: pagePath
+        });
+      }, 600);
+    });
+
+    expenseSlider.addEventListener('change', () => {
+      markCalculatorUsed();
+      clearTimeout(expenseDebounceTimer);
+      expenseDebounceTimer = setTimeout(() => {
+        const snap = getCalculatorSnapshot();
+        trackEvent('calculator_expense_change', {
+          value: snap.monthlyExp,
+          hourly_rate: snap.rate,
+          monthly_expenses: snap.monthlyExp,
+          estimated_tax_savings: snap.estimatedAnnualTaxSavings,
+          page_path: pagePath
+        });
+      }, 600);
+    });
+
     updateCalculator();
   }
 });
