@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const estimatedTaxRate = 0.35;
     const estimatedAnnualTaxSavings = annualExpenses * estimatedTaxRate;
     const taxableIncome = Math.max(0, grossBilling - annualExpenses);
-    const estimatedNetTax = taxableIncome * 0.28;
+    const estimatedNetTax = taxableIncome * 0.35;
     const estimatedTakeHome = (taxableIncome - estimatedNetTax) + annualExpenses;
 
     return {
