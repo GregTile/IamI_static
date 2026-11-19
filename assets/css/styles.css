@@ -377,6 +377,7 @@ p:last-child { margin-bottom: 0; }
 .stat-value {
   font-weight: 600;
   color: #ffffff;
+  text-align: right;
 }
 
 .stat-value.highlight {
