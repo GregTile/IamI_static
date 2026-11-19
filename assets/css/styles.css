@@ -398,6 +398,39 @@ p:last-child { margin-bottom: 0; }
   margin-bottom: 0.75rem;
 }
 
+/* Track Record / Credibility Strip */
+.track-record-bar {
+  background: var(--dark-bg);
+  color: #ffffff;
+  padding: 2.25rem 0;
+  border-bottom: 1px solid var(--dark-border);
+}
+
+.track-record-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.75rem;
+}
+
+.track-record-item {
+  border-left: 3px solid var(--accent);
+  padding-left: 1rem;
+}
+
+.track-record-item strong {
+  display: block;
+  font-size: 1.05rem;
+  color: #ffffff;
+  margin-bottom: 0.25rem;
+}
+
+.track-record-item span {
+  display: block;
+  font-size: 0.875rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
 /* Sections */
 .section {
   padding: 5rem 0;
@@ -1078,6 +1111,9 @@ textarea.form-control {
     grid-template-columns: 1fr;
     gap: 2.5rem;
   }
+  .track-record-grid {
+    grid-template-columns: 1fr 1fr;
+  }
   .calc-card, .booking-grid {
     grid-template-columns: 1fr;
     gap: 2rem;
@@ -1088,6 +1124,10 @@ textarea.form-control {
 }
 
 @media (max-width: 768px) {
+  .track-record-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
   .menu-toggle {
     display: block;
   }
