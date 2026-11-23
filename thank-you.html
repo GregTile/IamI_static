@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZEZWZV7GDF"></script>
+  <!-- Google tag (gtag.js) with Consent Mode v2 -->
   <script>
     // Strip any personal details Calendly might append to the URL before GA4 records the pageview
     if (window.location.search && window.history && window.history.replaceState) {
@@ -10,6 +9,31 @@
     }
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
+    (function() {
+      var saved = null;
+      try { saved = localStorage.getItem('iai_cookie_consent'); } catch (e) {}
+      var gpc = navigator.globalPrivacyControl === true;
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        region: ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IS','IE','IT','LV','LI','LT','LU','MT','NL','NO','PL','PT','RO','SK','SI','ES','SE','GB','CH'],
+        wait_for_update: 500
+      });
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: (saved === 'denied' || (!saved && gpc)) ? 'denied' : 'granted'
+      });
+      if (saved === 'granted' || saved === 'denied') {
+        gtag('consent', 'update', { analytics_storage: saved });
+      }
+    })();
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZEZWZV7GDF"></script>
+  <script>
     gtag('js', new Date());
     gtag('config', 'G-ZEZWZV7GDF');
   </script>
@@ -135,6 +159,7 @@
             <li><a href="faq.html">FAQ</a></li>
             <li><a href="about.html">Founders & Leadership</a></li>
             <li><a href="book.html">Contact & Consultation</a></li>
+            <li><a href="privacy-policy.html">Privacy Policy</a></li>
           </ul>
         </div>
 
@@ -148,7 +173,11 @@
 
       <div class="footer-bottom">
         <div>&copy; 2026 iamindependent.com, inc. All rights reserved.</div>
-        <div>Virtual USA-Based Organization &bull; Serving independent contractors in all 50 states and internationally.</div>
+        <div class="footer-legal-links">
+          <a href="privacy-policy.html">Privacy Policy</a>
+          <span aria-hidden="true">&bull;</span>
+          <button type="button" class="js-cookie-preferences">Cookie Preferences</button>
+        </div>
       </div>
     </div>
   </footer>

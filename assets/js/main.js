@@ -356,4 +356,89 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateCalculator();
   }
+
+  // 8. Cookie & Analytics Consent Banner (Google Consent Mode v2 + GDPR)
+  const CONSENT_STORAGE_KEY = 'iai_cookie_consent';
+
+  function getSavedConsent() {
+    try {
+      const value = localStorage.getItem(CONSENT_STORAGE_KEY);
+      if (value === 'granted' || value === 'denied') return value;
+    } catch (_) {
+      // Ignore storage restrictions
+    }
+    return null;
+  }
+
+  function applyAnalyticsConsent(state) {
+    if (typeof window.gtag === 'function') {
+      window.gtag('consent', 'update', {
+        analytics_storage: state,
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied'
+      });
+    }
+    try {
+      localStorage.setItem(CONSENT_STORAGE_KEY, state);
+    } catch (_) {
+      // Ignore storage restrictions
+    }
+  }
+
+  function createCookieBanner() {
+    let banner = document.getElementById('cookieConsentBanner');
+    if (banner) return banner;
+
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+      <aside class="cookie-banner" id="cookieConsentBanner" role="dialog" aria-live="polite" aria-label="Cookie and analytics preferences" hidden>
+        <div class="cookie-banner-text">
+          We use analytics cookies to understand site usage and improve your experience. <a href="privacy-policy.html">Privacy Policy</a>
+        </div>
+        <div class="cookie-banner-actions">
+          <button type="button" class="btn btn-decline" id="cookieDeclineBtn">Decline</button>
+          <button type="button" class="btn btn-primary" id="cookieAcceptBtn">Accept</button>
+        </div>
+      </aside>
+    `;
+    banner = wrapper.firstElementChild;
+    document.body.appendChild(banner);
+
+    const acceptBtn = banner.querySelector('#cookieAcceptBtn');
+    const declineBtn = banner.querySelector('#cookieDeclineBtn');
+
+    if (acceptBtn) {
+      acceptBtn.addEventListener('click', () => {
+        applyAnalyticsConsent('granted');
+        banner.hidden = true;
+      });
+    }
+
+    if (declineBtn) {
+      declineBtn.addEventListener('click', () => {
+        applyAnalyticsConsent('denied');
+        banner.hidden = true;
+      });
+    }
+
+    return banner;
+  }
+
+  const cookieBanner = createCookieBanner();
+  const savedConsent = getSavedConsent();
+  const hasGpcSignal = navigator.globalPrivacyControl === true;
+
+  if (!savedConsent && !hasGpcSignal) {
+    cookieBanner.hidden = false;
+  }
+
+  document.querySelectorAll('.js-cookie-preferences').forEach(trigger => {
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      cookieBanner.hidden = false;
+      const acceptBtn = cookieBanner.querySelector('#cookieAcceptBtn');
+      if (acceptBtn) acceptBtn.focus();
+    });
+  });
 });
